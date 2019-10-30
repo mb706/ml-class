@@ -15,10 +15,10 @@ config.maxlen = 1000
 config.batch_size = 64
 config.embedding_dims = 50
 config.filters = 50
-config.kernel_size = 3
+config.kernel_size = 7
 config.hidden_dims = 100
 config.epochs = 10
-
+print("kernel_size 7")
 (X_train, y_train), (X_test, y_test) = imdb.load_data(num_words=config.vocab_size)
 
 X_train = sequence.pad_sequences(X_train, maxlen=config.maxlen)
@@ -34,15 +34,23 @@ if 'GPU' in str(device_lib.list_local_devices()):
     GRU = CuDNNGRU
 
 
+config.kernel_size = 7
 model = tf.keras.models.Sequential()
 model.add(tf.keras.layers.Embedding(config.vocab_size,
                                     config.embedding_dims,
                                     input_length=config.maxlen))
 model.add(tf.keras.layers.Conv1D(config.filters,
-                                 config.kernel_size,
+                                 config.kernel_size - 2,
+                                 padding='valid',
+                                 strides = 2,
+                                 activation='relu'))
+model.add(tf.keras.layers.Dropout(0.5))
+model.add(tf.keras.layers.Conv1D(config.filters,
+                                 config.kernel_size - 2,
                                  padding='valid',
                                  activation='relu'))
 model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dropout(0.5))
 model.add(tf.keras.layers.Dense(config.hidden_dims, activation='relu'))
 model.add(tf.keras.layers.Dropout(0.5))
 model.add(tf.keras.layers.Dense(1, activation='sigmoid'))

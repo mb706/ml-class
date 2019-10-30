@@ -2,6 +2,7 @@
 import tensorflow as tf
 import numpy as np
 import wandb
+import random
 
 wandb.init()
 config = wandb.config
@@ -43,7 +44,7 @@ class CharacterTable(object):
 # Parameters for the model and dataset.
 config.training_size = 10000
 config.digits = 3
-config.hidden_size = 64
+config.hidden_size = 256
 config.batch_size = 64
 
 # Maximum length of input is 'int + int' (e.g., '345+678'). Maximum length of
@@ -70,10 +71,15 @@ while len(questions) < config.training_size:
     seen.add(key)
     
     # Pad the data with spaces such that it is always MAXLEN.
-    q = '{}+{}'.format(a, b)
-    query = q + ' ' * (maxlen - len(q))
-    ans = str(a + b)
-
+    if random.random() < .5:
+        q = '{}+{}'.format(a, b)
+        query = q + ' ' * (maxlen - len(q))
+        ans = str(a + b)
+    else:
+        q = '{}-{}'.format(a, b)
+        query = q + ' ' * (maxlen - len(q))
+        ans = str(a - b)
+    
     # Pad answer - Answers can be of maximum size DIGITS + 1.
     ans += ' ' * (config.digits + 1 - len(ans))
 
@@ -129,14 +135,14 @@ split_at = len(x) - len(x) // 10
 (y_train, y_val) = y[:split_at], y[split_at:]
 
 model = tf.keras.Sequential()
-model.add(tf.keras.layers.LSTM(config.hidden_size,
+model.add(tf.keras.layers.GRU(config.hidden_size,
                                input_shape=(maxlen, len(chars))))
 model.add(tf.keras.layers.RepeatVector(config.digits + 1))
-model.add(tf.keras.layers.LSTM(config.hidden_size, return_sequences=True))
+model.add(tf.keras.layers.GRU(config.hidden_size, return_sequences=True))
 model.add(tf.keras.layers.TimeDistributed(
     tf.keras.layers.Dense(len(chars), activation='softmax')))
 model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
+              optimizer='nadam',
               metrics=['accuracy'])
 model.summary()
 model.fit(x_train, y_train,

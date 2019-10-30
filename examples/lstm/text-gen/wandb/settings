@@ -1,4 +1,5 @@
 [default]
-entity: odsc-class
-project: text-gen
-base_url: https://api.wandb.ai
+entity = odsc-class
+project = text-gen
+base_url = https://api.wandb.ai
+

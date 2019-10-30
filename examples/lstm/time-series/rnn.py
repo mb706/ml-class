@@ -11,6 +11,7 @@ config.batch_size = 40
 config.look_back = 4
 config.epochs = 500
 
+print("hi")
 
 def load_data(data_type="airline"):
     """read a CSV into a dataframe"""

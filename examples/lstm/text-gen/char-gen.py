@@ -45,7 +45,7 @@ for i, sentence in enumerate(sentences):
     y[i, char_indices[next_chars[i]]] = 1
 
 model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.SimpleRNN(
+model.add(tf.keras.layers.GRU(
     128, input_shape=(config.maxlen, len(chars))))
 model.add(tf.keras.layers.Dense(len(chars), activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer="rmsprop")
